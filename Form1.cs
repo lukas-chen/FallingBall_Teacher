@@ -25,6 +25,8 @@ namespace FallingBall
         const int GridSize = BallSize + 4;
         const int BallSize = 32;
 
+        int MenuHeight = 0;
+
         Color[,] balls = new Color[GridWidth, GridHeight];
         Color[] colors = { Color.Red, Color.Blue/*, Color.Orange, Color.Green*/ };
         Stack<Undo> undo = new Stack<Undo>();
@@ -34,8 +36,14 @@ namespace FallingBall
             SetStyle(ControlStyles.UserPaint, true);
             SetStyle(ControlStyles.OptimizedDoubleBuffer, true);
 
-            this.ClientSize = new Size(GridWidth * GridSize + 1, GridHeight * GridSize + 1);
+            MenuHeight = menuStrip1.Height;
+            this.ClientSize = new Size(GridWidth * GridSize + 1, GridHeight * GridSize + 1 + MenuHeight);
 
+            NewGame();
+        }
+
+        private void NewGame()
+        {
             Random rnd = new Random();
 
             for (int x = 0; x < GridWidth; x++)
@@ -45,22 +53,23 @@ namespace FallingBall
                     balls[x, y] = colors[rnd.Next(colors.Length)];
                 }
             }
+            this.Invalidate();
         }
 
         private void Form1_Paint(object sender, PaintEventArgs e)
         {
             for(int x = 0;x <= GridWidth; x++)
-                e.Graphics.DrawLine(Pens.Black, x * GridSize, 0, x * GridSize, GridHeight * GridSize);
+                e.Graphics.DrawLine(Pens.Black, x * GridSize, MenuHeight, x * GridSize, GridHeight * GridSize + MenuHeight);
 
             for (int y = 0; y <= GridHeight; y++)
-                e.Graphics.DrawLine(Pens.Black, 0, y * GridSize, GridWidth * GridSize, y * GridSize);
+                e.Graphics.DrawLine(Pens.Black, 0, y * GridSize + MenuHeight, GridWidth * GridSize, y * GridSize + MenuHeight);
 
             for (int x = 0; x < GridWidth; x++)
             {
                 for (int y = 0; y < GridHeight; y++)
                 {
                     Brush b = new SolidBrush(balls[x, y]);
-                    e.Graphics.FillEllipse(b, x * GridSize + 2, y * GridSize + 2, BallSize, BallSize);
+                    e.Graphics.FillEllipse(b, x * GridSize + 2, y * GridSize + 2 + MenuHeight, BallSize, BallSize);
                 }
             }
 
@@ -95,7 +104,7 @@ namespace FallingBall
                 this.Cursor = Cursors.WaitCursor;
 
                 int x = e.X / GridSize;
-                int y = e.Y / GridSize;
+                int y = (e.Y - MenuHeight) / GridSize;
 
                 if (x < GridWidth && y < GridHeight && balls[x, y] != Color.Empty)
                 {
@@ -238,7 +247,11 @@ namespace FallingBall
 
         private void menuNew_Click(object sender, EventArgs e)
         {
-
+            if (MessageBox.Show("是否要啟動新遊戲?", "開啟新遊戲", MessageBoxButtons.YesNo) == DialogResult.Yes)
+            {
+                NewGame();
+            }
+            
         }
 
         private void menuOpen_Click(object sender, EventArgs e)
@@ -279,8 +292,8 @@ namespace FallingBall
 
         private void menuExit_Click(object sender, EventArgs e)
         {
-            Application.Exit();
-
+            if (MessageBox.Show("Are you sure you wanna leave??", "Exit", MessageBoxButtons.YesNo) == DialogResult.Yes)
+                Application.Exit();
         }
     }
 }

@@ -3,7 +3,9 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Drawing;
+using System.IO;
 using System.Linq;
+using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -232,6 +234,53 @@ namespace FallingBall
                 Wait();
                 inKeyDown = false;
             }
+        }
+
+        private void menuNew_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void menuOpen_Click(object sender, EventArgs e)
+        {
+            BinaryFormatter bf = new BinaryFormatter();
+            using (FileStream fs = new FileStream(spath + @"\colors.bin", FileMode.Open))
+            {
+                balls = (Color[,])bf.Deserialize(fs);
+            }
+
+            using (FileStream fs = new FileStream(spath + @"\undo.bin", FileMode.Open))
+            {
+                undo = (Stack<Undo>)bf.Deserialize(fs);
+            }
+            this.Invalidate();
+        }
+
+        string spath = Application.StartupPath + "\\SaveData";
+
+        private void menuSave_Click(object sender, EventArgs e)
+        {
+            if (Directory.Exists(spath))
+                Directory.CreateDirectory(spath);
+
+            BinaryFormatter bf = new BinaryFormatter();
+            using (FileStream fs = new FileStream(spath + @"\colors.bin", FileMode.Create))
+            {
+                bf.Serialize(fs, balls);
+            }
+
+            using (FileStream fs = new FileStream(spath + @"\undo.bin", FileMode.Create))
+            {
+                bf.Serialize(fs, undo);
+            }
+
+            MessageBox.Show("DONE");
+        }
+
+        private void menuExit_Click(object sender, EventArgs e)
+        {
+            Application.Exit();
+
         }
     }
 }

@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 
 namespace FallingBall
 {
+    [Serializable]
     struct Undo
     {
         public Color Color { get; set; }
